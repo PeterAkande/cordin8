@@ -6,21 +6,22 @@ resource "aws_iam_role" "c8_lambda_exec_role" {
   name = "c8-lambda-exec-role"
 
   assume_role_policy = jsonencode({
-    Version = "2012-10-17"
-    Statement = [{
-      Action = "sts:AssumeRole"
-      Effect = "Allow"
-      Sid    = ""
-      Principal = {
-        Service = "lambda.amazonaws.com"
-      }
+    Version   = "2012-10-17"
+    Statement = [
+      {
+        Action    = "sts:AssumeRole"
+        Effect    = "Allow"
+        Sid       = ""
+        Principal = {
+          Service = "lambda.amazonaws.com"
+        }
       }
     ]
   })
 }
 
 resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role = aws_iam_role.c8_lambda_exec_role.name
+  role       = aws_iam_role.c8_lambda_exec_role.name
   // This makes things easy, using this predefined AWS Managed Role.
   // We can actually create aws_iam_policy resource and attach it but ist not needed
   policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
