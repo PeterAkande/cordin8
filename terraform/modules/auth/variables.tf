@@ -1,7 +1,13 @@
 variable "handler" {
-  default = "modules.auth.main.lambda_handler"
+  default = "services.auth.main.lambda_handler"
+}
+variable "user_sign_up_handler" {
+  default = "services.auth.signup.lambda_handler"
 }
 
+variable "user_sign_in_handler" {
+  default = "services.auth.signin.lambda_handler"
+}
 // This is the Id of the rest API resource
 variable "rest_api_id" {
   default = ""
@@ -28,5 +34,9 @@ variable "archive_file_base_64_sha256" {
 }
 
 variable "rest_api_execution_arn" {
+  default = ""
+}
+
+variable "lambda_layer_id" {
   default = ""
 }

@@ -1,6 +1,13 @@
 // This would contain all the lambdas
 
 
+resource "aws_lambda_layer_version" "c8-lambda-layer" {
+  filename   = "../build/python.zip"
+  layer_name = "python"
+
+  compatible_runtimes      = ["python3.8", "python3.7", "python3.9"]
+  compatible_architectures = ["x86_64", "arm64"]
+}
 // Create the required roles first.
 resource "aws_iam_role" "c8_lambda_exec_role" {
   name = "c8-lambda-exec-role"
@@ -35,6 +42,8 @@ resource "aws_lambda_function" "first_func" {
 
   s3_bucket = aws_s3_bucket.cordin8_lambda_bucket.id
   s3_key    = aws_s3_object.c8_lambda_code.key
+
+  layers = [aws_lambda_layer_version.c8-lambda-layer.arn]
 
   runtime = "python3.8"
   handler = "main.lambda_handler"

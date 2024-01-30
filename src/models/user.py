@@ -5,13 +5,17 @@ from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
 class UserBaseModel(BaseModel):
+    name: str
+    email: EmailStr
+    phone: PhoneNumber
+
+
+class UserSignUp(UserBaseModel):
     """
     The user base model
     """
 
-    name: str
-    email: EmailStr
-    phone: PhoneNumber
+    password: str
 
 
 class User(UserBaseModel):

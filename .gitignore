@@ -6,3 +6,6 @@
 build/
 
 venv/
+
+packages/
+src/python/

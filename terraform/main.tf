@@ -1,4 +1,3 @@
-
 module "auth" {
   source = "./modules/auth"
 
@@ -9,6 +8,7 @@ module "auth" {
   s3_bucket_key               = aws_s3_object.c8_lambda_code.key
   archive_file_base_64_sha256 = data.archive_file.c8_lambda_code_zip.output_base64sha256
   rest_api_execution_arn      = aws_api_gateway_rest_api.c8_rest_api_gateway.execution_arn
+  lambda_layer_id             = aws_lambda_layer_version.c8-lambda-layer.arn
 }
 
 

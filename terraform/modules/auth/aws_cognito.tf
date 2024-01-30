@@ -73,7 +73,7 @@ resource "aws_cognito_user_pool_client" "client" {
   name = "C8-COGNITO-CLIENT"
 
   user_pool_id                  = aws_cognito_user_pool.c8-user-pool.id
-  generate_secret               = false
+  generate_secret               = true
   prevent_user_existence_errors = "ENABLED"
 
   token_validity_units {

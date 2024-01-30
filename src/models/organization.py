@@ -7,5 +7,9 @@ class OrganizationBaseModel(BaseModel):
     logo_url: str = ""
 
 
+class OrganizationSignUp(OrganizationBaseModel):
+    password: str
+
+
 class Organization(BaseModel):
     id: str

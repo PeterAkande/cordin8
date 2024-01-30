@@ -27,10 +27,10 @@ resource "aws_dynamodb_table" "c8-users_table" {
   #    type = "S"
   #  }
 
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
-  }
+#  ttl {
+#    attribute_name = "TimeToExist"
+#    enabled        = false
+#  }
 
   tags = {
     Name        = "c8-user-table"
@@ -63,10 +63,10 @@ resource "aws_dynamodb_table" "c8-org_table" {
   #  }
 
 
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
-  }
+#  ttl {
+#    attribute_name = "TimeToExist"
+#    enabled        = false
+#  }
 
   tags = {
     Name        = "c8-org-table"
@@ -110,10 +110,10 @@ resource "aws_dynamodb_table" "c8-departments-table" {
 #    type = "S"
 #  }
 
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
-  }
+#  ttl {
+#    attribute_name = "TimeToExist"
+#    enabled        = false
+#  }
 
   tags = {
     Name        = "c8-dept-table"
@@ -185,10 +185,10 @@ resource "aws_dynamodb_table" "c8-tasks_table" {
 #    name = "comments" // list of comments
 #    type = "S"
 #  }
-  ttl {
-    attribute_name = "TimeToExist"
-    enabled        = false
-  }
+#  ttl {
+#    attribute_name = "TimeToExist"
+#    enabled        = false
+#  }
 
   tags = {
     Name        = "c8-tasks-table"

@@ -5,6 +5,16 @@ data "archive_file" "c8_lambda_code_zip" {
 
   source_dir  = "../src"
   output_path = "../build/build.zip"
+
+  excludes = ["python"]
+
+}
+
+data "archive_file" "c8_lambda_layer_zip" {
+  type = "zip"
+
+  source_dir  = "../src/python"
+  output_path = "../build/python.zip"
 }
 
 resource "aws_s3_object" "c8_lambda_code" {
