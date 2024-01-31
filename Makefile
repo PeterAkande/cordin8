@@ -1,11 +1,14 @@
 deploy:
 	@pip freeze > requirements.txt
-	# pip install -r requirements.txt --platform manylinux2014_x86_64 --target ./src/python --implementation cp --upgrade --python-version 3.10 --only-binary=:all:
-	pip install -r requirements.txt --platform manylinux2014_x86_64 --target ./src/python --implementation cp --upgrade --only-binary=:all:
+	docker run -v $(shell PWD):/var/task "lambci/lambda:build-python3.8" /bin/bash -c "pip install -r requirements.txt -t src/python"
 
-	cd src/python; zip -r ../../build/python.zip . -x requirements.txt
+	# cd src/python; zip -r ../../build/python.zip . -x requirements.txt
 	
 	cd terraform; terraform apply --auto-approve
 
 deploy_only:
 	cd terraform; terraform apply --auto-approve
+
+
+docker_build:
+	docker run -v $(shell PWD):/var/task "lambci/lambda:build-python3.8" /bin/bash -c "pip install -r requirements.txt -t src/python"

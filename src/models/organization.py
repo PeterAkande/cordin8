@@ -1,7 +1,7 @@
-# from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr
 
 
-class OrganizationBaseModel:
+class OrganizationBaseModel(BaseModel):
     name: str
     email: str
     logo_url: str = ""

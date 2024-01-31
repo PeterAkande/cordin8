@@ -2,7 +2,7 @@ import json
 import logging
 import traceback
 
-from marshmallow import ValidationError
+from pydantic import ValidationError
 
 from proxy_response_handler.api_exception import APIServerError
 from models.user import UserSignUp, User
@@ -16,13 +16,13 @@ logger.setLevel(logging.INFO)
 
 def lambda_handler(event, context, access_token=None):
     try:
-        body = json.loads(event["body"])
+        body = json.loads(event.get('body', {}))
     except Exception as e:
         traceback.print_exc()
 
         return APIServerError("Bad Request, Cant parse body", status_code=400)
     try:
-        user_sign_up_model = UserSignUp.load(body)
+        user_sign_up_model = UserSignUp(**body)
     except ValidationError as e:
         traceback.print_exc()
         return APIServerError("Bad Request, Cant parse body", status_code=400)
@@ -45,7 +45,7 @@ def lambda_handler(event, context, access_token=None):
         return APIServerError("An Error occurred", status_code=400)
 
     user_details = {**user_sign_up_model.dump(), "user_id": user_id}
-    user = User.load(user_details)
+    user = User(**user_details)
     save_user_details(user)
 
     return SimpleResponse(

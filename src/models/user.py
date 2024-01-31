@@ -1,10 +1,12 @@
-from marshmallow import Schema, fields
+from pydantic import BaseModel, EmailStr
+
+from pydantic_extra_types.phone_numbers import PhoneNumber
 
 
-class UserBaseModel:
-    name: fields.Str()
-    email: fields.Email()
-    phone: fields.Str()
+class UserBaseModel(BaseModel):
+    name: str
+    email: EmailStr
+    phone: PhoneNumber
 
 
 class UserSignUp(UserBaseModel):
@@ -12,9 +14,9 @@ class UserSignUp(UserBaseModel):
     The user base model
     """
 
-    password: fields.Str()
+    password: str
 
 
 class User(UserBaseModel):
-    id: fields.Str()
-    date_created = fields.Date()
+    id: str
+    date_created: str
