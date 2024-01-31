@@ -10,12 +10,12 @@ data "archive_file" "c8_lambda_code_zip" {
 
 }
 
-data "archive_file" "c8_lambda_layer_zip" {
-  type = "zip"
+# data "archive_file" "c8_lambda_layer_zip" {
+#   type = "zip"
 
-  source_dir  = "../src/python"
-  output_path = "../build/python.zip"
-}
+#   source_dir  = "../src/python"
+#   output_path = "../build/python.zip"
+# }
 
 resource "aws_s3_object" "c8_lambda_code" {
   key    = "build.zip"

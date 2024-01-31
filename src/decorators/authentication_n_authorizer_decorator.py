@@ -1,8 +1,8 @@
 import traceback
 
-from src.proxy_response_handler.api_exception import APIServerError
-from src.proxy_response_handler.lambda_proxy_response import LambdaProxyResponse
-from src.utils.cognito_utils import Cordin8CognitoHandler
+from proxy_response_handler.api_exception import APIServerError
+from proxy_response_handler.lambda_proxy_response import LambdaProxyResponse
+from utils.cognito_utils import Cordin8CognitoHandler
 
 
 def cordin8_api(authorized: bool = True):

@@ -3,7 +3,7 @@
 
 resource "aws_lambda_layer_version" "c8-lambda-layer" {
   filename   = "../build/python.zip"
-  layer_name = "python"
+  layer_name = "c8-python-lambda-layer"
 
   compatible_runtimes      = ["python3.8", "python3.7", "python3.9"]
   compatible_architectures = ["x86_64", "arm64"]

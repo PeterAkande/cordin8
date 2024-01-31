@@ -1,4 +1,4 @@
-from src.proxy_response_handler.lambda_proxy_response import LambdaProxyResponse
+from proxy_response_handler.lambda_proxy_response import LambdaProxyResponse
 
 
 class SimpleResponse(LambdaProxyResponse):

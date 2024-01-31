@@ -8,7 +8,7 @@ resource "aws_lambda_function" "c8-auth-func" {
 
   layers = [var.lambda_layer_id]
 
-  runtime = "python3.9"
+  runtime = "python3.8"
   handler = var.handler
 
   source_code_hash = var.archive_file_base_64_sha256
@@ -37,7 +37,7 @@ resource "aws_lambda_function" "c8-user-signup" {
   layers = [var.lambda_layer_id]
 
 
-  runtime = "python3.9"
+  runtime = "python3.8"
   handler = var.user_sign_up_handler
 
   source_code_hash = var.archive_file_base_64_sha256
@@ -67,7 +67,7 @@ resource "aws_lambda_function" "c8-user-signin" {
   layers = [var.lambda_layer_id]
 
 
-  runtime = "python3.9"
+  runtime = "python3.8"
   handler = var.user_sign_in_handler
 
   source_code_hash = var.archive_file_base_64_sha256

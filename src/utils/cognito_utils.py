@@ -6,10 +6,10 @@ import boto3
 import jwt
 from botocore.exceptions import ClientError
 
-from src.constants import user_pool_id, client_id, client_secret, region
-from src.models.user import UserSignUp
-from src.models.organization import OrganizationSignUp
-from src.proxy_response_handler.api_exception import APIServerError
+from constants import user_pool_id, client_id, client_secret, region
+from models.user import UserSignUp
+from models.organization import OrganizationSignUp
+from proxy_response_handler.api_exception import APIServerError
 
 
 class Cordin8CognitoHandler:

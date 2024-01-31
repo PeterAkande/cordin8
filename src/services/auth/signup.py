@@ -2,13 +2,13 @@ import json
 import logging
 import traceback
 
-from pydantic import ValidationError
+from marshmallow import ValidationError
 
-from src.proxy_response_handler.api_exception import APIServerError
-from src.models.user import UserSignUp, User
-from src.proxy_response_handler.simple_response import SimpleResponse
-from src.utils.cognito_utils import Cordin8CognitoHandler
-from src.utils.dynamo_db_handlers.user_db_handler import save_user_details
+from proxy_response_handler.api_exception import APIServerError
+from models.user import UserSignUp, User
+from proxy_response_handler.simple_response import SimpleResponse
+from utils.cognito_utils import Cordin8CognitoHandler
+from utils.dynamo_db_handlers.user_db_handler import save_user_details
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
@@ -22,7 +22,7 @@ def lambda_handler(event, context, access_token=None):
 
         return APIServerError("Bad Request, Cant parse body", status_code=400)
     try:
-        user_sign_up_model = UserSignUp(**body)
+        user_sign_up_model = UserSignUp.load(body)
     except ValidationError as e:
         traceback.print_exc()
         return APIServerError("Bad Request, Cant parse body", status_code=400)
@@ -44,11 +44,11 @@ def lambda_handler(event, context, access_token=None):
     if user_id is None:
         return APIServerError("An Error occurred", status_code=400)
 
-    user_details = {**user_sign_up_model.model_dump_json(), "user_id": user_id}
-    user = User(**user_details)
+    user_details = {**user_sign_up_model.dump(), "user_id": user_id}
+    user = User.load(user_details)
     save_user_details(user)
 
     return SimpleResponse(
-        body={"message": "User Registered", "user": user.model_dump_json()},
+        body={"message": "User Registered", "user": user.dump()},
         status_code=200,
     )

@@ -1,10 +1,10 @@
 import json
 import traceback
 
-from src.proxy_response_handler.api_exception import APIServerError
-from src.proxy_response_handler.simple_response import SimpleResponse
-from src.utils.cognito_utils import Cordin8CognitoHandler
-from src.utils.dynamo_db_handlers.user_db_handler import get_user_with_email
+from proxy_response_handler.api_exception import APIServerError
+from proxy_response_handler.simple_response import SimpleResponse
+from utils.cognito_utils import Cordin8CognitoHandler
+from utils.dynamo_db_handlers.user_db_handler import get_user_with_email
 
 
 def lambda_handler(event, context):
@@ -28,7 +28,7 @@ def lambda_handler(event, context):
     if not user_found:
         return APIServerError("Password or Email not present", status_code=400)
 
-    profile_type = user.get("profile_type", None)
+    # profile_type = user.get("profile_type", None)
 
     # if profile_type is None:
     #     return APIServerError("User not found", status_code=400)

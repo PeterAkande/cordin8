@@ -5,8 +5,8 @@ from typing import Optional
 
 from botocore.exceptions import ClientError
 
-from src.models.user import User
-from src.constants import user_table_name
+from models.user import User
+from constants import user_table_name
 
 
 def save_user_details(user: User) -> bool:
