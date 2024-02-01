@@ -25,13 +25,71 @@ resource "aws_iam_role" "c8_lambda_exec_role" {
       }
     ]
   })
+
+  managed_policy_arns = [
+    aws_iam_policy.invoke-cognito-policy.arn, aws_iam_policy.aws_assumed_role.arn, aws_iam_policy.dynamo-db-policy.arn
+  ]
 }
 
-resource "aws_iam_role_policy_attachment" "lambda_policy" {
-  role       = aws_iam_role.c8_lambda_exec_role.name
-  // This makes things easy, using this predefined AWS Managed Role.
-  // We can actually create aws_iam_policy resource and attach it but ist not needed
-  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+#resource "aws_iam_role_policy_attachment" "lambda_policy" {
+#  role       = aws_iam_role.c8_lambda_exec_role.name
+#  // This makes things easy, using this predefined AWS Managed Role.
+#  // We can actually create aws_iam_policy resource and attach it but ist not needed
+#  policy_arn = "arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole"
+#}
+
+
+resource "aws_iam_policy" "invoke-cognito-policy" {
+  name = "invoke-cognito-from-lambda"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "Stmt1706752366251",
+        "Action" : "cognito-idp:*",
+        "Effect" : "Allow",
+        "Resource" : aws_cognito_user_pool.c8-user-pool.arn
+      }
+    ]
+  })
+}
+
+resource "aws_iam_policy" "dynamo-db-policy" {
+  name = "invoke-dynamodb-from-lambda"
+
+  policy = jsonencode( {
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Sid" : "Stmt1706777921387",
+        "Action" : "dynamodb:*",
+        "Effect" : "Allow",
+        "Resource" : "*"
+      }
+    ]
+  })
+}
+
+
+resource "aws_iam_policy" "aws_assumed_role" {
+  // This is used because you cant use managed_policy_arns with aws_iam_role_policy_attachment
+  name = "aws-assumed-role"
+
+  policy = jsonencode({
+    "Version" : "2012-10-17",
+    "Statement" : [
+      {
+        "Effect" : "Allow",
+        "Action" : [
+          "logs:CreateLogGroup",
+          "logs:CreateLogStream",
+          "logs:PutLogEvents"
+        ],
+        "Resource" : "*"
+      }
+    ]
+  })
 }
 
 

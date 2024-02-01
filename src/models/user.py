@@ -18,5 +18,5 @@ class UserSignUp(UserBaseModel):
 
 
 class User(UserBaseModel):
-    id: str
+    user_id: str
     date_created: str

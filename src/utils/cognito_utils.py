@@ -1,6 +1,7 @@
 import base64
 import hashlib
 import hmac
+import logging
 
 import boto3
 import jwt
@@ -10,6 +11,9 @@ from constants import user_pool_id, client_id, client_secret, region
 from models.user import UserSignUp
 from models.organization import OrganizationSignUp
 from proxy_response_handler.api_exception import APIServerError
+
+logger = logging.Logger(name='Cordin8CognitoHandler')
+logger.setLevel(logging.INFO)
 
 
 class Cordin8CognitoHandler:
@@ -22,29 +26,35 @@ class Cordin8CognitoHandler:
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.cognito_idp_client = boto3.client('cognito-idp', region=region)
+        self.cognito_idp_client = boto3.client('cognito-idp')
 
     def sign_up_user(self, user: UserSignUp) -> (bool, str):
         """
         Sign up a user
         """
         try:
+
+            user_phone = str(user.phone).replace('tel:', '').replace('-', '')
             kwargs = {
                 'ClientId': self.client_id, 'Username': user.email, 'Password': user.password,
                 'UserAttributes': [
                     {'Name': 'email', 'Value': user.email},
                     {'Name': 'name', 'Value': user.name},
-                    {'Name': 'phone_number', 'Value': user.phone},
+                    {'Name': 'phone_number', 'Value': user_phone},
                     {'Name': 'custom:profile_type', 'Value': "user"}
                 ],
             }
+
+            print(f"The params is {kwargs}")
             if self.client_secret is not None:
                 kwargs['SecretHash'] = self._get_secret_hash_for_user(user.email)
             response = self.cognito_idp_client.sign_up(**kwargs)
 
         except ClientError as err:
+            logger.info(f'Error Signing up is given by {err.response["Error"]}')
+            print(f"Error is {err.response['Error']}")
 
-            return False, err.response['Error']['Code']
+            return False, err.response['Error']['Message']
 
         return True, "Success"
 
@@ -142,5 +152,3 @@ class Cordin8CognitoHandler:
                 raise e
 
         return user, token
-    
-

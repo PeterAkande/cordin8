@@ -1,7 +1,7 @@
 # Move these constants to env
-user_pool_id = "us-west-2_KEDoXXV7N"
-client_id = "5buoohi0k2su7nrnaagactlgku"
-client_secret = "nb5t65sc7o6o1ibn1j7b8mnb6tfemtodctlrvtiol22gv12raab"
+user_pool_id = "us-west-2_zlwgPjC2E"
+client_id = "727d4675chml0j77d81m9shbu0"
+client_secret = "1qmofifhi05t0p3aqst5pks88b92666ujod6fi6uml1d5ppqodsl"
 region = "us-west-2"
 
 user_table_name = "C8-USER-TABLE"
