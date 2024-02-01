@@ -12,7 +12,7 @@ from models.user import UserSignUp
 from models.organization import OrganizationSignUp
 from proxy_response_handler.api_exception import APIServerError
 
-logger = logging.Logger(name='Cordin8CognitoHandler')
+logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
@@ -128,8 +128,8 @@ class Cordin8CognitoHandler:
             msg=str(msg).encode('utf-8'),
             digestmod=hashlib.sha256).digest()
 
-        d2 = base64.b64encode(digest).decode()
-        return d2
+        secret_hash = base64.b64encode(digest).decode()
+        return secret_hash
 
     def validate_user_token(self, token: str):
         """
@@ -152,3 +152,59 @@ class Cordin8CognitoHandler:
                 raise e
 
         return user, token
+
+    def verify_user_token(self, code: str, email: str) -> (bool, str):
+        """
+        This would verify a user sign up with the code that was sent to the user
+        """
+
+        try:
+            secret_hash = self._get_secret_hash_for_user(email_address=email)
+
+            response = self.cognito_idp_client.confirm_sign_up(
+                ClientId=self.client_id,
+                SecretHash=secret_hash,
+                Username=email,
+                ConfirmationCode=code,
+
+            )
+        except ClientError as err:
+            logger.info('Error confirming Sign up')
+            logger.info(err.response['Error']['Message'])
+
+            return False, err.response['Error']['Message']
+
+        except Exception as e:
+            logger.info('An unknown error occurred when confirming signing up')
+
+            return False, 'Unknown error occurred'
+
+        return True, 'User Confirmed successfully'
+
+    def resend_verification_code(self, email: str) -> (bool, str):
+        """
+        This resends a verification code to this email address
+
+        returns: (bool, str) => if the operation was successful, the error or some message
+        """
+
+        try:
+            secret_hash = self._get_secret_hash_for_user(email_address=email)
+
+            response = self.client_id.resend_confirmation_code(
+                ClientId=self.client_id,
+                SecretHash=secret_hash,
+                Username=email,
+            )
+        except ClientError as err:
+            logger.info('Error resending code')
+            logger.info(err.response['Error']['Message'])
+
+            return False, err.response['Error']['Message']
+
+        except Exception as e:
+            logger.info('An unknown error occurred when resending codep')
+
+            return False, 'Unknown error occurred'
+
+        return True, 'Code Confirmed successfully'

@@ -20,3 +20,4 @@ class UserSignUp(UserBaseModel):
 class User(UserBaseModel):
     user_id: str
     date_created: str
+    isVerified: bool

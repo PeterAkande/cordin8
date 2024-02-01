@@ -52,7 +52,8 @@ def lambda_handler(event, context, access_token=None):
         return APIServerError("An Error occurred", status_code=400)
 
     date_created = datetime.datetime.now().isoformat()
-    user_details = {**user_sign_up_model.model_dump(), "user_id": user_id, 'date_created': date_created}
+    user_details = {**user_sign_up_model.model_dump(), "user_id": user_id, 'date_created': date_created,
+                    'is_verified': False}
 
     logger.info(f"User Details ot be parses is: {user_details}")
     user = User(**user_details)
