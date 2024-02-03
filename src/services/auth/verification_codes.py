@@ -40,6 +40,7 @@ def lambda_handler(event, context, access_token=None):
         error_message,
         email_verified,
         user_id,
+        profile_type,
     ) = cognito_handler.get_user_details_from_cognito(email=email)
 
     if not operation_success:

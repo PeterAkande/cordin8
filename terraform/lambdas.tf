@@ -108,4 +108,6 @@ resource "aws_lambda_function" "first_func" {
 
   source_code_hash = data.archive_file.c8_lambda_code_zip.output_base64sha256
 
+  memory_size = var.memory_size
+
 }

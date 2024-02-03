@@ -5,6 +5,7 @@ import boto3
 from typing import Optional
 
 from botocore.exceptions import ClientError
+from pydantic import ValidationError
 
 from models.user import User
 from constants import user_table_name
@@ -68,31 +69,41 @@ class UserDynamoDbHandler:
             return None
 
         return None
-
+    
     def get_user_with_id(self, id: str) -> Optional[User]:
         """
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb/table/get_item.html
         """
 
-        logger.info(f"Checking for use with Id: {id}")
+        logger.info(f"Checking for user with Id: {id}")
 
         try:
             response = self.users_table.get_item(Key={"user_id": id})
+            logger.info(f"Response is {response}")
 
             user_details = response["Item"]
 
-            if len(user_details) == 0:
+            if user_details is None:
                 return None
 
             logger.info(f"Gotten user details, {user_details}")
+            logger.info(f"User type {type(user_details)}")
+
+            # user = User(name="perer", user_id="Peuod", )
+            
             user = User(**user_details)
 
+            logger.info(f"Parsed User as {user}")
             return user
 
         except ClientError as err:
             traceback.print_exc()
 
             logger.error(f"Error is {err.response['Errror']['Message']}")
+            return None
+
+        except ValidationError as ve:
+            logger.error(f"Error is {ve}")
             return None
 
         except Exception as e:

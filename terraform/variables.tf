@@ -12,3 +12,7 @@ variable "python_runtime" {
   type = string
   default = "python3.8"
 }
+variable "memory_size" {
+  type = number
+  default = 1024
+}

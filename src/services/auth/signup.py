@@ -26,7 +26,7 @@ def lambda_handler(event, context, access_token=None):
 
     print("Event Print")
     print(event)
-    
+
     try:
         body = json.loads(event.get("body", {}))
     except Exception as e:
@@ -57,6 +57,7 @@ def lambda_handler(event, context, access_token=None):
         error_message,
         email_verified,
         user_id,
+        profile_type,
     ) = cognito_handler.get_user_details_from_cognito(email=user_sign_up_model.email)
 
     if not operation_successful:

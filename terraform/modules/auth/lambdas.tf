@@ -13,6 +13,9 @@ resource "aws_lambda_function" "c8-auth-func" {
 
   source_code_hash = var.archive_file_base_64_sha256
 
+  memory_size = var.memory_size
+
+
 }
 
 // Define the permission to invoKe a function.
@@ -41,6 +44,9 @@ resource "aws_lambda_function" "c8-user-signup" {
   handler = var.user_sign_up_handler
 
   source_code_hash = var.archive_file_base_64_sha256
+
+  memory_size = var.memory_size
+
 
 }
 
@@ -71,6 +77,9 @@ resource "aws_lambda_function" "c8-user-signin" {
   handler = var.user_sign_in_handler
 
   source_code_hash = var.archive_file_base_64_sha256
+
+  memory_size = var.memory_size
+
 
 }
 
@@ -105,6 +114,9 @@ resource "aws_lambda_function" "c8-verification-code-lambda" {
 
   source_code_hash = var.archive_file_base_64_sha256
 
+  memory_size = var.memory_size
+
+
 }
 
 // Define the permission to invoke the function
@@ -135,6 +147,7 @@ resource "aws_lambda_function" "c8-verification-code-confirm-lambda" {
   handler = var.verification_codes_confirm_handler
 
   source_code_hash = var.archive_file_base_64_sha256
+  memory_size      = var.memory_size
 
 }
 

@@ -53,3 +53,8 @@ variable "lambda_layer_id" {
 variable "python_runtime" {
   default = ""
 }
+
+variable "memory_size" {
+  type = number
+  default = 128
+}

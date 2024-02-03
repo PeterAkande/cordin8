@@ -111,9 +111,9 @@ class Cordin8CognitoHandler:
 
         return True, response
 
-    def get_user_details_from_cognito(self, email: str) -> (bool, str, bool, str):
+    def get_user_details_from_cognito(self, email: str) -> (bool, str, bool, str, str):
         """
-        (bool, str, bool, str) => operation_success_status, error, email_verified, user_id
+        (bool, str, bool, str) => operation_success_status, error, email_verified, user_id, profile_type
         """
 
         try:
@@ -122,18 +122,19 @@ class Cordin8CognitoHandler:
             )
         except ClientError as err:
             # if err.response["Error"]["Code"] == "UserNotFoundException":
-            return False, err.response["Error"]["Message"], False, ""
+            return False, err.response["Error"]["Message"], False, "", ""
 
         except Exception as e:
             traceback.print_exec()
 
             logger.info("An Errro occurred")
-            return False, "An Error occurred", False, ""
+            return False, "An Error occurred", False, "", ""
 
         user_attributes = verify_response["UserAttributes"]
 
         email_verified = None
         user_id = None
+        profile_type = None
 
         logger.info(f"User Attributes {user_attributes}")
         for node in user_attributes:
@@ -141,10 +142,18 @@ class Cordin8CognitoHandler:
                 email_verified = node["Value"]
             elif node["Name"] == "sub":
                 user_id = node["Value"]
+            elif node["Name"] == 'custom:profile_type':
+                profile_type = node["Value"]
 
-        email_verification_status = email_verified == 'true'        
+        email_verification_status = email_verified == "true"
 
-        return True, "User registered successfully", email_verification_status, user_id
+        return (
+            True,
+            "User registered successfully",
+            email_verification_status,
+            user_id,
+            profile_type,
+        )
 
     def _get_secret_hash_for_user(self, email_address):
         msg = email_address + self.client_id

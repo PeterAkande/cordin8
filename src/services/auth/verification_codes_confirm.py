@@ -37,10 +37,11 @@ def lambda_handler(event, context, access_token=None):
         error_message,
         email_verified,
         user_id,
+        profile_type,
     ) = cognito_handler.get_user_details_from_cognito(email=email)
 
     if not operation_success:
-        return APIServerError(operation_success, status_code=400)
+        return APIServerError(error_message, status_code=400)
 
     if email_verified:
         return APIServerError("User is verified aleady", status_code=400)
