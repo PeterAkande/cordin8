@@ -2,6 +2,7 @@ import base64
 import hashlib
 import hmac
 import logging
+import traceback
 
 import boto3
 import jwt
@@ -26,7 +27,7 @@ class Cordin8CognitoHandler:
         self.client_id = client_id
         self.client_secret = client_secret
 
-        self.cognito_idp_client = boto3.client('cognito-idp')
+        self.cognito_idp_client = boto3.client("cognito-idp")
 
     def sign_up_user(self, user: UserSignUp) -> (bool, str):
         """
@@ -34,27 +35,29 @@ class Cordin8CognitoHandler:
         """
         try:
 
-            user_phone = str(user.phone).replace('tel:', '').replace('-', '')
+            user_phone = str(user.phone).replace("tel:", "").replace("-", "")
             kwargs = {
-                'ClientId': self.client_id, 'Username': user.email, 'Password': user.password,
-                'UserAttributes': [
-                    {'Name': 'email', 'Value': user.email},
-                    {'Name': 'name', 'Value': user.name},
-                    {'Name': 'phone_number', 'Value': user_phone},
-                    {'Name': 'custom:profile_type', 'Value': "user"}
+                "ClientId": self.client_id,
+                "Username": user.email,
+                "Password": user.password,
+                "UserAttributes": [
+                    {"Name": "email", "Value": user.email},
+                    {"Name": "name", "Value": user.name},
+                    {"Name": "phone_number", "Value": user_phone},
+                    {"Name": "custom:profile_type", "Value": "user"},
                 ],
             }
 
             print(f"The params is {kwargs}")
             if self.client_secret is not None:
-                kwargs['SecretHash'] = self._get_secret_hash_for_user(user.email)
+                kwargs["SecretHash"] = self._get_secret_hash_for_user(user.email)
             response = self.cognito_idp_client.sign_up(**kwargs)
 
         except ClientError as err:
             logger.info(f'Error Signing up is given by {err.response["Error"]}')
             print(f"Error is {err.response['Error']}")
 
-            return False, err.response['Error']['Message']
+            return False, err.response["Error"]["Message"]
 
         return True, "Success"
 
@@ -64,20 +67,22 @@ class Cordin8CognitoHandler:
         """
         try:
             kwargs = {
-                'ClientId': self.client_id, 'Username': org.email, 'Password': org.password,
-                'UserAttributes': [
-                    {'Name': 'email', 'Value': org.email},
-                    {'Name': 'name', 'Value': org.name},
-                    {'Name': 'custom:profile_type', 'Value': "org"}
+                "ClientId": self.client_id,
+                "Username": org.email,
+                "Password": org.password,
+                "UserAttributes": [
+                    {"Name": "email", "Value": org.email},
+                    {"Name": "name", "Value": org.name},
+                    {"Name": "custom:profile_type", "Value": "org"},
                 ],
             }
             if self.client_secret is not None:
-                kwargs['SecretHash'] = self._get_secret_hash_for_user(org.email)
+                kwargs["SecretHash"] = self._get_secret_hash_for_user(org.email)
             response = self.cognito_idp_client.sign_up(**kwargs)
 
         except ClientError as err:
 
-            return False, err.response['Error']['Code']
+            return False, err.response["Error"]["Code"]
 
         return True, "Success"
 
@@ -89,12 +94,15 @@ class Cordin8CognitoHandler:
 
         try:
             kwargs = {
-                'UserPoolId': self.user_pool_id,
-                'ClientId': self.client_id,
-                'AuthFlow': 'ADMIN_USER_PASSWORD_AUTH',
-                'AuthParameters': {'USERNAME': email, 'PASSWORD': password}}
+                "UserPoolId": self.user_pool_id,
+                "ClientId": self.client_id,
+                "AuthFlow": "ADMIN_USER_PASSWORD_AUTH",
+                "AuthParameters": {"USERNAME": email, "PASSWORD": password},
+            }
             if self.client_secret is not None:
-                kwargs['AuthParameters']['SECRET_HASH'] = self._get_secret_hash_for_user(email)
+                kwargs["AuthParameters"]["SECRET_HASH"] = (
+                    self._get_secret_hash_for_user(email)
+                )
 
             response = self.cognito_idp_client.admin_initiate_auth(**kwargs)
 
@@ -103,10 +111,26 @@ class Cordin8CognitoHandler:
 
         return True, response
 
-    def get_user_details_from_cognito(self, email: str):
+    def get_user_details_from_cognito(self, email: str) -> (bool, str, bool, str):
+        """
+        (bool, str, bool, str) => operation_success_status, error, email_verified, user_id
+        """
 
-        verify_response = self.cognito_idp_client.admin_get_user(UserPoolId=self.user_pool_id, Username=email)
-        user_attributes = verify_response['UserAttributes']
+        try:
+            verify_response = self.cognito_idp_client.admin_get_user(
+                UserPoolId=self.user_pool_id, Username=email
+            )
+        except ClientError as err:
+            # if err.response["Error"]["Code"] == "UserNotFoundException":
+            return False, err.response["Error"]["Message"], False, ""
+
+        except Exception as e:
+            traceback.print_exec()
+
+            logger.info("An Errro occurred")
+            return False, "An Error occurred", False, ""
+
+        user_attributes = verify_response["UserAttributes"]
 
         email_verified = None
         user_id = None
@@ -116,17 +140,16 @@ class Cordin8CognitoHandler:
                 email_verified = node["Value"]
             elif node["Name"] == "sub":
                 user_id = node["Value"]
-            elif node["Name"] == "phone_number_verified":
-                phone_verified = node["Value"]
 
-        return email_verified, user_id, phone_verified
+        return email_verified, user_id
 
     def _get_secret_hash_for_user(self, email_address):
         msg = email_address + self.client_id
         digest = hmac.new(
-            str(self.client_secret).encode('utf-8'),
-            msg=str(msg).encode('utf-8'),
-            digestmod=hashlib.sha256).digest()
+            str(self.client_secret).encode("utf-8"),
+            msg=str(msg).encode("utf-8"),
+            digestmod=hashlib.sha256,
+        ).digest()
 
         secret_hash = base64.b64encode(digest).decode()
         return secret_hash
@@ -136,26 +159,29 @@ class Cordin8CognitoHandler:
         Validate the token passed
         """
 
-        if not token.startswith('Bearer '):
-            raise APIServerError('Invalid token format, token should start with "Bearer "', 401)
+        if not token.startswith("Bearer "):
+            raise APIServerError(
+                'Invalid token format, token should start with "Bearer "', 401
+            )
 
         try:
             user = self.cognito_idp_client.get_user(access_token=token)
         except jwt.DecodeError as e:
-            raise APIServerError('Invalid JWT token', 401, inner=e)
+            raise APIServerError("Invalid JWT token", 401, inner=e)
         except jwt.ExpiredSignatureError as e:
-            raise APIServerError('JWT Token is expired', 401, inner=e)
+            raise APIServerError("JWT Token is expired", 401, inner=e)
         except Exception as e:
             if "Access Token has expired" in str(e):
-                raise APIServerError('JWT Token is expired', 401, inner=e)
+                raise APIServerError("JWT Token is expired", 401, inner=e)
             else:
                 raise e
 
         return user, token
 
-    def verify_user_token(self, code: str, email: str) -> (bool, str):
+    def verify_user_code(self, code: str, email: str) -> (bool, str):
         """
         This would verify a user sign up with the code that was sent to the user
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/cognito-idp/client/confirm_sign_up.html
         """
 
         try:
@@ -166,20 +192,19 @@ class Cordin8CognitoHandler:
                 SecretHash=secret_hash,
                 Username=email,
                 ConfirmationCode=code,
-
             )
         except ClientError as err:
-            logger.info('Error confirming Sign up')
-            logger.info(err.response['Error']['Message'])
+            logger.info("Error confirming Sign up")
+            logger.info(err.response["Error"]["Message"])
 
-            return False, err.response['Error']['Message']
+            return False, err.response["Error"]["Message"]
 
         except Exception as e:
-            logger.info('An unknown error occurred when confirming signing up')
+            logger.info("An unknown error occurred when confirming signing up")
 
-            return False, 'Unknown error occurred'
+            return False, "Unknown error occurred"
 
-        return True, 'User Confirmed successfully'
+        return True, "User Confirmed successfully"
 
     def resend_verification_code(self, email: str) -> (bool, str):
         """
@@ -197,14 +222,14 @@ class Cordin8CognitoHandler:
                 Username=email,
             )
         except ClientError as err:
-            logger.info('Error resending code')
-            logger.info(err.response['Error']['Message'])
+            logger.info("Error resending code")
+            logger.info(err.response["Error"]["Message"])
 
-            return False, err.response['Error']['Message']
+            return False, err.response["Error"]["Message"]
 
         except Exception as e:
-            logger.info('An unknown error occurred when resending codep')
+            logger.info("An unknown error occurred when resending codep")
 
-            return False, 'Unknown error occurred'
+            return False, "Unknown error occurred"
 
-        return True, 'Code Confirmed successfully'
+        return True, f"Code Sent to email {email} successfully"

@@ -13,51 +13,80 @@ logger = logging.getLogger()
 logger.setLevel(logging.INFO)
 
 
-def save_user_details(user: User) -> bool:
-    logger.info('User details to be saved')
-    logger.info(f'{user.model_dump()}')
+class UserDynamoDbHandler:
 
-    logger.info(f'Table name is {user_table_name}')
-    dynamodb_resource = boto3.resource('dynamodb')
-    users_table = dynamodb_resource.Table(user_table_name)
+    def __init__(self) -> None:
+        self.dynamodb_resource = boto3.resource("dynamodb")
+        self.users_table = self.dynamodb_resource.Table(user_table_name)
+        pass
 
-    logger.info("User details os")
+    def save_user_details(self, user: User) -> bool:
+        logger.info("User details to be saved")
+        logger.info(f"{user.model_dump()}")
 
-    try:
-        response = users_table.put_item(Item=user.model_dump())
-        logger.info('Saved Successfully')
-    except ClientError as err:
-        logger.info(f"Eeror saving details, {err.response['Error']} ")
-        return False
+        logger.info(f"Table name is {user_table_name}")
 
-    except Exception as e:
-        logger.info(f'Saved Error {e}')
-        traceback.print_exc()
-        return False
+        logger.info("User details os")
 
-    return True
+        try:
+            response = self.users_table.put_item(Item=user.model_dump())
+            logger.info("Saved Successfully")
+        except ClientError as err:
+            logger.info(f"Eeror saving details, {err.response['Error']} ")
+            return False
 
+        except Exception as e:
+            logger.info(f"Saved Error {e}")
+            traceback.print_exc()
+            return False
 
-def get_user_with_email(email: str) -> Optional[User]:
-    dynamodb_resource = boto3.resource('dynamodb')
-    users_table = dynamodb_resource.Table(user_table_name)
+        return True
 
-    try:
-        response = users_table.scan(
-            FilterExpression="email = :email_address",
-            ExpressionAttributeValues={
-                ":email_address": email
-            }
-        )
+    def get_user_with_email(self, email: str) -> Optional[User]:
+        """
+        Get a user with an email.
+        Dont use this!. It makes a scan which can be computationaly intensive.
 
-        if "Items" in response:
-            user_details = response['Items']
+        Instead, get the id of the user from cognito and search by the id instead
+
+        """
+
+        try:
+            response = self.users_table.scan(
+                FilterExpression="email = :email_address",
+                ExpressionAttributeValues={":email_address": email},
+            )
+
+            if "Items" in response:
+                user_details = response["Items"]
+
+                user = User(**user_details)
+
+                return user
+
+        except ClientError as err:
+            return None
+
+        return None
+
+    def get_user_with_id(self, id: str) -> Optional[User]:
+        """
+        https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb/table/get_item.html
+        """
+
+        try:
+            response = self.users_table.get_item(Key={"user_id": id})
+
+            user_details = response["Item"]
+
+            if len(user_details) == 0:
+                return None
 
             user = User(**user_details)
 
             return user
 
-    except ClientError as err:
-        return None
+        except ClientError as err:
+            return None
 
-    return None
+        return None
