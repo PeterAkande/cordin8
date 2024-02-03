@@ -70,7 +70,7 @@ resource "aws_api_gateway_integration" "c8_signup_integration" {
 resource "aws_api_gateway_resource" "c8-send-verification-code" {
   parent_id   = aws_api_gateway_resource.c8-auth-resource.id
   rest_api_id = var.rest_api_id
-  path_part   = "verification"
+  path_part   = "verification-code"
 }
 
 resource "aws_api_gateway_method" "c8-verification-code-post" {
@@ -110,7 +110,7 @@ resource "aws_api_gateway_method" "c8-verification-code-confirm-post" {
   http_method   = "POST"
 }
 
-resource "aws_api_gateway_integration" "c8-verification-integration" {
+resource "aws_api_gateway_integration" "c8-verification-code-confirm-integration" {
   resource_id = aws_api_gateway_resource.c8-verification-code-confirm.id
   rest_api_id = var.rest_api_id
   http_method = aws_api_gateway_method.c8-verification-code-confirm-post.http_method
