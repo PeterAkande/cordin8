@@ -64,3 +64,61 @@ resource "aws_api_gateway_integration" "c8_signup_integration" {
   uri                     = aws_lambda_function.c8-user-signup.invoke_arn
 }
 
+///------- Verify Code ---------////
+
+// This would handle /{version}/auth/verification-code
+resource "aws_api_gateway_resource" "c8-send-verification-code" {
+  parent_id   = aws_api_gateway_resource.c8-auth-resource.id
+  rest_api_id = var.rest_api_id
+  path_part   = "verification"
+}
+
+resource "aws_api_gateway_method" "c8-verification-code-post" {
+  resource_id = aws_api_gateway_resource.c8-send-verification-code.id
+  rest_api_id = var.rest_api_id
+
+  authorization = "NONE"
+  http_method   = "POST"
+}
+
+resource "aws_api_gateway_integration" "c8-verification-integration" {
+  resource_id = aws_api_gateway_resource.c8-send-verification-code.id
+  rest_api_id = var.rest_api_id
+  http_method = aws_api_gateway_method.c8-verification-code-post.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+
+  uri = aws_lambda_function.c8-verification-code-lambda.invoke_arn
+
+}
+
+///------- Verify Code Confirm ---------////
+
+// This would handle /{version}/auth/verification-code/confirm
+resource "aws_api_gateway_resource" "c8-verification-code-confirm" {
+  parent_id   = aws_api_gateway_resource.c8-send-verification-code.id
+  rest_api_id = var.rest_api_id
+  path_part   = "confirm"
+}
+
+resource "aws_api_gateway_method" "c8-verification-code-confirm-post" {
+  resource_id = aws_api_gateway_resource.c8-verification-code-confirm.id
+  rest_api_id = var.rest_api_id
+
+  authorization = "NONE"
+  http_method   = "POST"
+}
+
+resource "aws_api_gateway_integration" "c8-verification-integration" {
+  resource_id = aws_api_gateway_resource.c8-verification-code-confirm.id
+  rest_api_id = var.rest_api_id
+  http_method = aws_api_gateway_method.c8-verification-code-confirm-post.http_method
+
+  integration_http_method = "POST"
+  type                    = "AWS_PROXY"
+
+  uri = aws_lambda_function.c8-verification-code-confirm-lambda.invoke_arn
+
+}
+

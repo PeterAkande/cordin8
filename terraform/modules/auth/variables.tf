@@ -8,6 +8,15 @@ variable "user_sign_up_handler" {
 variable "user_sign_in_handler" {
   default = "services.auth.signin.lambda_handler"
 }
+
+variable "verification_codes_handler" {
+  default = "services.auth.verification_codes.lambda_handler"
+}
+
+variable "verification_codes_confirm_handler" {
+  default = "services.auth.verification_codes_confirm.lambda_handler"
+}
+
 // This is the Id of the rest API resource
 variable "rest_api_id" {
   default = ""
@@ -38,5 +47,9 @@ variable "rest_api_execution_arn" {
 }
 
 variable "lambda_layer_id" {
+  default = ""
+}
+
+variable "python_runtime" {
   default = ""
 }
