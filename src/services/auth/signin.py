@@ -7,6 +7,7 @@ from proxy_response_handler.simple_response import SimpleResponse
 from decorators.authentication_n_authorizer_decorator import cordin8_api
 from utils.cognito_utils import Cordin8CognitoHandler
 from utils.dynamo_db_handlers.user_db_handler import UserDynamoDbHandler
+from utils.dynamo_db_handlers.org_db_handler import OrgDynamoDbHandler
 
 
 logger = logging.getLogger()
@@ -30,6 +31,7 @@ def lambda_handler(event, context):
 
     cognito_handler = Cordin8CognitoHandler()
     user_dynamodb_handler = UserDynamoDbHandler()
+    org_dynamodb_handler = OrgDynamoDbHandler()
 
     user_found, user_token = cognito_handler.sign_in_org_or_user(
         email=email, password=password
@@ -80,6 +82,11 @@ def lambda_handler(event, context):
 
         return SimpleResponse(body=body, status_code=200)
 
+    # This is an organization
+    org = org_dynamodb_handler.get_org_with_id(id=user_id)
+
+    if org is None:
+        return APIServerError("Organzation not found", status_code=400)
     body = {
         "message": "Sign in Succesful",
         "data": {
@@ -87,7 +94,7 @@ def lambda_handler(event, context):
                 "access_token": access_token,
                 "refresh_token": refresh_token,
             },
-            "org": "Org details incoming",
+            "org": org.model_dump(),
         },
     }
     return SimpleResponse(body=body, status_code=200)

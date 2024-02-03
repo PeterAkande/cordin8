@@ -4,6 +4,7 @@ from decorators.authentication_n_authorizer_decorator import cordin8_api
 from proxy_response_handler.api_exception import APIServerError
 from proxy_response_handler.simple_response import SimpleResponse
 from utils.dynamo_db_handlers.user_db_handler import UserDynamoDbHandler
+from utils.dynamo_db_handlers.org_db_handler import OrgDynamoDbHandler
 from utils.cognito_utils import Cordin8CognitoHandler
 
 
@@ -23,6 +24,7 @@ def lambda_handler(event, context, access_token=None):
 
     cognito_handler = Cordin8CognitoHandler()
     user_dynamodb_handler = UserDynamoDbHandler()
+    org_dynamodb_handler = OrgDynamoDbHandler()
 
     # Get the email and the code from the body
     email = body.get("email", None)
@@ -46,16 +48,26 @@ def lambda_handler(event, context, access_token=None):
     if email_verified:
         return APIServerError("User is verified aleady", status_code=400)
 
-    # Now check if the code entered was valids
+    # Now check if the code entered was valid
     success, message = cognito_handler.verify_user_code(code=code, email=email)
 
     if not success:
         return APIServerError(message=message, status_code=400)
 
-    user = user_dynamodb_handler.get_user_with_id(user_id)
-    user.is_verified = True
+    if profile_type == "user":
+        user = user_dynamodb_handler.get_user_with_id(user_id)
+        user.is_verified = True
+
+        # Save the new user details
+        user_dynamodb_handler.save_user_details(user)
+
+        return SimpleResponse(body={"message": "User verified successfully"})
+
+    # This is an org
+    org = org_dynamodb_handler.get_org_with_id(user_id)
+    org.is_verified = True
 
     # Save the new user details
-    user_dynamodb_handler.save_user_details(user)
+    org_dynamodb_handler.save_org_details(org)
 
-    return SimpleResponse(body={"message": "User verified successfully"})
+    return SimpleResponse(body={"message": "Organizarion verified successfully"})

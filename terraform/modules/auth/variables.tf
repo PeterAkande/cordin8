@@ -17,6 +17,10 @@ variable "verification_codes_confirm_handler" {
   default = "services.auth.verification_codes_confirm.lambda_handler"
 }
 
+variable "org_signup_handler" {
+  default = "services.auth.org.signup.lambda_handler"
+}
+
 // This is the Id of the rest API resource
 variable "rest_api_id" {
   default = ""
@@ -55,6 +59,6 @@ variable "python_runtime" {
 }
 
 variable "memory_size" {
-  type = number
+  type    = number
   default = 128
 }
