@@ -74,6 +74,8 @@ class UserDynamoDbHandler:
         https://boto3.amazonaws.com/v1/documentation/api/latest/reference/services/dynamodb/table/get_item.html
         """
 
+        logger.info(f"Checking for use with Id: {id}")
+
         try:
             response = self.users_table.get_item(Key={"user_id": id})
 
@@ -82,11 +84,21 @@ class UserDynamoDbHandler:
             if len(user_details) == 0:
                 return None
 
+            logger.info(f"Gotten user details, {user_details}")
             user = User(**user_details)
 
             return user
 
         except ClientError as err:
+            traceback.print_exc()
+
+            logger.error(f"Error is {err.response['Errror']['Message']}")
+            return None
+
+        except Exception as e:
+            traceback.print_exc()
+
+            logger.error(f"Error is {e}")
             return None
 
         return None

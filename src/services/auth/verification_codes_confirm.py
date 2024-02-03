@@ -7,7 +7,7 @@ from utils.dynamo_db_handlers.user_db_handler import UserDynamoDbHandler
 from utils.cognito_utils import Cordin8CognitoHandler
 
 
-@cordin8_api()
+@cordin8_api(authorized=False)
 def lambda_handler(event, context, access_token=None):
     """
     This would handle verifying the access token of the user.

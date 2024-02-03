@@ -134,14 +134,17 @@ class Cordin8CognitoHandler:
 
         email_verified = None
         user_id = None
-        phone_verified = None
+
+        logger.info(f"User Attributes {user_attributes}")
         for node in user_attributes:
             if node["Name"] == "email_verified":
                 email_verified = node["Value"]
             elif node["Name"] == "sub":
                 user_id = node["Value"]
 
-        return email_verified, user_id
+        email_verification_status = email_verified == 'true'        
+
+        return True, "User registered successfully", email_verification_status, user_id
 
     def _get_secret_hash_for_user(self, email_address):
         msg = email_address + self.client_id
@@ -191,7 +194,7 @@ class Cordin8CognitoHandler:
                 ClientId=self.client_id,
                 SecretHash=secret_hash,
                 Username=email,
-                ConfirmationCode=code,
+                ConfirmationCode=str(code),
             )
         except ClientError as err:
             logger.info("Error confirming Sign up")
@@ -200,6 +203,7 @@ class Cordin8CognitoHandler:
             return False, err.response["Error"]["Message"]
 
         except Exception as e:
+            traceback.print_exc()
             logger.info("An unknown error occurred when confirming signing up")
 
             return False, "Unknown error occurred"
@@ -216,7 +220,7 @@ class Cordin8CognitoHandler:
         try:
             secret_hash = self._get_secret_hash_for_user(email_address=email)
 
-            response = self.client_id.resend_confirmation_code(
+            response = self.cognito_idp_client.resend_confirmation_code(
                 ClientId=self.client_id,
                 SecretHash=secret_hash,
                 Username=email,
@@ -228,6 +232,7 @@ class Cordin8CognitoHandler:
             return False, err.response["Error"]["Message"]
 
         except Exception as e:
+            traceback.print_exc()
             logger.info("An unknown error occurred when resending codep")
 
             return False, "Unknown error occurred"

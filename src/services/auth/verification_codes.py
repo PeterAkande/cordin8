@@ -2,11 +2,12 @@ import json
 import traceback
 
 from proxy_response_handler.api_exception import APIServerError
+from decorators.authentication_n_authorizer_decorator import cordin8_api
 from proxy_response_handler.simple_response import SimpleResponse
 from utils.cognito_utils import Cordin8CognitoHandler
 from utils.dynamo_db_handlers.user_db_handler import UserDynamoDbHandler
 
-
+@cordin8_api(authorized=False)
 def lambda_handler(event, context, access_token=None):
     """
     This would handle sending a verification code to the user.
@@ -15,6 +16,11 @@ def lambda_handler(event, context, access_token=None):
 
     try:
         body = json.loads(event.get("body", {}))
+
+    except TypeError as te:
+        traceback.print_exc()
+        return APIServerError("Bad Request, Cant parse body", status_code=400)
+
     except Exception as e:
         traceback.print_exc()
 
