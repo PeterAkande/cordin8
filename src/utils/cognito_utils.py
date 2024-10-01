@@ -142,7 +142,7 @@ class Cordin8CognitoHandler:
                 email_verified = node["Value"]
             elif node["Name"] == "sub":
                 user_id = node["Value"]
-            elif node["Name"] == 'custom:profile_type':
+            elif node["Name"] == "custom:profile_type":
                 profile_type = node["Value"]
 
         email_verification_status = email_verified == "true"
@@ -176,19 +176,51 @@ class Cordin8CognitoHandler:
                 'Invalid token format, token should start with "Bearer "', 401
             )
 
+        access_token = token.split(" ")[1]
         try:
-            user = self.cognito_idp_client.get_user(access_token=token)
-        except jwt.DecodeError as e:
-            raise APIServerError("Invalid JWT token", 401, inner=e)
-        except jwt.ExpiredSignatureError as e:
-            raise APIServerError("JWT Token is expired", 401, inner=e)
+            user = self.cognito_idp_client.get_user(AccessToken=access_token)
+
+            logger.info(f"This is the user {user}")
+
+            user_attributes = user["UserAttributes"]
+
+            email_verified = None
+            user_id = None
+            profile_type = None
+            email = None
+            name = None
+
+            logger.info(f"User Attributes {user_attributes}")
+            for node in user_attributes:
+                if node["Name"] == "email_verified":
+                    email_verified = node["Value"]
+                elif node["Name"] == "sub":
+                    user_id = node["Value"]
+                elif node["Name"] == "custom:profile_type":
+                    profile_type = node["Value"]
+                elif node["Name"] == "name":
+                    name = node["Value"]
+                elif node["Name"] == "email":
+                    email = node["Value"]
+
+            email_verification_status = email_verified == "true"
+
+            user_details = {
+                "profile_type": profile_type,
+                "profile_id": user_id,
+                "email": email,
+                "name": name,
+                "verification_status": email_verification_status,
+            }
+        except ClientError as err:
+            raise APIServerError(err.response["Error"]["Message"], 401, inner=err)
         except Exception as e:
             if "Access Token has expired" in str(e):
                 raise APIServerError("JWT Token is expired", 401, inner=e)
             else:
                 raise e
 
-        return user, token
+        return user_details, access_token
 
     def verify_user_code(self, code: str, email: str) -> (bool, str):
         """

@@ -1,5 +1,6 @@
 from pydantic_extra_types.phone_numbers import PhoneNumber
 from pydantic import BaseModel, EmailStr
+from pydantic.json import pydantic_encoder
 
 
 class UserBaseModel(BaseModel):
@@ -34,4 +35,7 @@ if __name__ == "__main__":
 
     user = User(**data)
 
+    l = [user, user, user]
+
     print(user)
+    print(dict(l)['__root__'])
