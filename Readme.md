@@ -1,0 +1,1 @@
+# Serverless Backend app built with Lambda, DynamoDb, Cognito, S3. Infra is managed with Terraform
